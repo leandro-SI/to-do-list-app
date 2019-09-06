@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayAdapter<String> itensAdaptador;
     private ArrayList<String> itens;
+    private  ArrayList<Integer> ids;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +53,26 @@ public class MainActivity extends AppCompatActivity {
                     salvarTarefa(textoDigitado);
 
 
+                }
+            });
+
+            /*listaTarefas.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                    removerTarefa(ids.get(i));
+                    Toast.makeText(MainActivity.this, "Tarefa Removida", Toast.LENGTH_SHORT).show();
+                }
+            }); */
+
+            //Remover com toque longo
+            listaTarefas.setLongClickable(true);
+            listaTarefas.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                    removerTarefa(ids.get(i));
+                    return true;
                 }
             });
 
@@ -94,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
 
             //Criar Adaptador
             itens = new ArrayList<String>();
+            ids = new ArrayList<Integer>();
             itensAdaptador = new ArrayAdapter<String>(getApplicationContext(),
                     android.R.layout.simple_list_item_2,
                     android.R.id.text2,
@@ -107,9 +130,22 @@ public class MainActivity extends AppCompatActivity {
 
                 //Log.i("Resultado - ", "tarefa: " + cursor.getString(indiceColunaTarefa));
                 itens.add(cursor.getString(indiceColunaTarefa));
+                ids.add(Integer.parseInt(cursor.getString(indiceColunaId)));
                 cursor.moveToNext();
             }
 
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void removerTarefa(Integer id){
+
+        try{
+
+            bancoDados.execSQL("DELETE FROM tarefas WHERE id = "+id);
+            recuperarTarefas();
 
         }catch (Exception e){
             e.printStackTrace();
